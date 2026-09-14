@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spy Check</title>
+
+<style>
+body{
+    font-family:sans-serif;
+    background:#111;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+.card{
+    background:#222;
+    border-radius:12px;
+    padding:20px;
+    margin:20px auto;
+    max-width:500px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    background:#4f46e5;
+    color:white;
+    font-size:16px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    margin-bottom:10px;
+}
+
+.hidden{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🕵️ Spy Check</h1>
+
+<div class="card" id="setup">
+    <input id="name" placeholder="플레이어 이름">
+
+    <button onclick="addPlayer()">
+        플레이어 추가
+    </button>
+
+    <div id="players"></div>
+
+    <button onclick="startGame()">
+        게임 시작
+    </button>
+</div>
+
+<div class="card hidden" id="game"></div>
+
+<script>
+
+let players=[];
+let spy=-1;
+
+const questions=[
+"당신은 약속 시간을 잘 지키나요?",
+"당신은 비밀을 잘 지키나요?",
+"당신은 거짓말을 자주 하나요?",
+"당신은 새로운 사람과 쉽게 친해지나요?",
+"당신은 충동구매를 자주 하나요?"
+];
+
+function addPlayer(){
+
+    const name=document.getElementById("name").value;
+
+    if(!name)return;
+
+    players.push(name);
+
+    document.getElementById("name").value="";
+
+    renderPlayers();
+}
+
+function renderPlayers(){
+
+    document.getElementById("players").innerHTML=
+    players.map(p=>`<div>${p}</div>`).join("");
+}
+
+function startGame(){
+
+    if(players.length<4){
+        alert("최소 4명 필요");
+        return;
+    }
+
+    spy=Math.floor(Math.random()*players.length);
+
+    const question=
+    questions[Math.floor(Math.random()*questions.length)];
+
+    let html="";
+
+    players.forEach((p,i)=>{
+
+        html+=`
+        <button onclick="
+        alert('${
+            i===spy
+            ? '당신은 스파이입니다. 질문은 볼 수 없습니다.'
+            : question
+        }')
+        ">
+        ${p} 역할 확인
+        </button>
+        `;
+    });
+
+    document.getElementById("setup").classList.add("hidden");
+
+    const game=document.getElementById("game");
+
+    game.classList.remove("hidden");
+
+    game.innerHTML=html;
+}
+
+</script>
+
+</body>
+</html>
