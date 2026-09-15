@@ -1856,18 +1856,31 @@ function renderResult(){
     );
 
 
-  if(result.caught){
+  if(result.votedPlayer === null){
 
     title.innerText =
-      "🎉 시민 승리!";
-
+    "⚖️ 동률 발생!";
 
     text.innerHTML =
-      `스파이는 <strong>${escapeHtml(spyName)}</strong>였습니다.<br>
-       ${escapeHtml(votedName)}에게 ${result.voteCount}표가 몰렸습니다.`;
-
+    `최다 득표자가 여러 명이라 아무도 탈락하지 않았습니다.<br>
+    다음 라운드를 진행합니다.`;
 
     area.innerHTML = "";
+
+}
+
+else if(result.caught){
+
+    title.innerText =
+    "🎉 시민 승리!";
+
+    text.innerHTML =
+    `스파이는 <strong>${escapeHtml(spyName)}</strong>였습니다.<br>
+    ${escapeHtml(votedName)}에게 ${result.voteCount}표가 몰렸습니다.`;
+
+    area.innerHTML = "";
+
+}
 
 
     if(roomData.hostId === myId){
