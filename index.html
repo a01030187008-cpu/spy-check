@@ -1378,6 +1378,49 @@ function renderReveal(){
     .innerText =
       roomData.question.situation;
 
+  const resultBox =
+    document.getElementById("answerResults");
+
+  
+  resultBox.innerHTML = "";
+
+
+  const answers =
+    roomData.answers[roomData.round] || {};
+
+
+  Object.keys(answers).forEach(id => {
+
+  const player =
+    roomData.players[id];
+
+
+  if(!player) return;
+
+
+  const choice =
+    roomData.question.choices[
+      answers[id]
+    ];
+
+
+  const div =
+    document.createElement("div");
+
+
+  div.className = "player";
+
+
+  div.innerHTML =
+    `
+    <span>${escapeHtml(player.name)}</span>
+    <span>${escapeHtml(choice)}</span>
+    `;
+
+
+  resultBox.appendChild(div);
+
+});
 
   document
     .getElementById("revealQuestion")
