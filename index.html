@@ -1818,170 +1818,176 @@ function renderResult(){
 
   showScreen("resultScreen");
 
-
-  const result =
-    roomData.result;
-
+  const result = roomData.result;
 
   if(!result) return;
-
 
   const spyName =
     roomData.players[result.spyId]
       ? roomData.players[result.spyId].name
       : "알 수 없음";
 
-
   const votedName =
     roomData.players[result.votedPlayer]
       ? roomData.players[result.votedPlayer].name
       : "없음";
 
-
   const title =
-    document.getElementById(
-      "resultTitle"
-    );
-
+    document.getElementById("resultTitle");
 
   const text =
-    document.getElementById(
-      "resultText"
-    );
-
+    document.getElementById("resultText");
 
   const area =
-    document.getElementById(
-      "nextRoundArea"
-    );
+    document.getElementById("nextRoundArea");
 
 
-  if(result && result.votedPlayer === null){
+  /* =========================
+     동률
+  ========================= */
 
-    title.innerText =
-    "⚖️ 동률 발생!";
+  if(result.votedPlayer === null){
 
-    text.innerHTML =
-    `최다 득표자가 여러 명이라 아무도 탈락하지 않았습니다.<br>
-    다음 라운드를 진행합니다.`;
-
-    area.innerHTML = "";
-
-}
-
-  else if(result && result.caught){
-
-    title.innerText =
-    "🎉 시민 승리!";
+    title.innerText = "⚖️ 동률 발생!";
 
     text.innerHTML =
-    `스파이는 <strong>${escapeHtml(spyName)}</strong>였습니다.<br>
-    ${escapeHtml(votedName)}에게 ${result.voteCount}표가 몰렸습니다.`;
+      `최다 득표자가 여러 명이라 아무도 탈락하지 않았습니다.<br>
+       다음 라운드를 진행합니다.`;
 
     area.innerHTML = "";
-
-}
-
 
     if(roomData.hostId === myId){
 
       const button =
         document.createElement("button");
 
-
       button.className = "green";
-
 
       button.innerText =
         "새 게임 시작";
 
-
       button.onclick =
         resetGame;
 
+      area.appendChild(button);
+
+    }else{
+
+      area.innerHTML =
+        '<div class="status">방장이 다음 게임을 시작하기를 기다리는 중...</div>';
+
+    }
+
+    return;
+  }
+
+
+  /* =========================
+     스파이 검거 성공
+  ========================= */
+
+  if(result.caught){
+
+    title.innerText =
+      "🎉 시민 승리!";
+
+    text.innerHTML =
+      `스파이는 <strong>${escapeHtml(spyName)}</strong>였습니다.<br>
+       ${escapeHtml(votedName)}에게 ${result.voteCount}표가 몰렸습니다.`;
+
+    area.innerHTML = "";
+
+    if(roomData.hostId === myId){
+
+      const button =
+        document.createElement("button");
+
+      button.className = "green";
+
+      button.innerText =
+        "새 게임 시작";
+
+      button.onclick =
+        resetGame;
 
       area.appendChild(button);
 
     }
 
-  }else{
-
-    if(roomData.round >= 3){
-
-      title.innerText =
-        "🕵️ 스파이 승리!";
+    return;
+  }
 
 
-      text.innerHTML =
-        `스파이 <strong>${escapeHtml(spyName)}</strong>가
-         3라운드 동안 잡히지 않았습니다.`;
+  /* =========================
+     3라운드 종료 → 스파이 승리
+  ========================= */
 
-      area.innerHTML = "";
+  if(roomData.round >= 3){
 
+    title.innerText =
+      "🕵️ 스파이 승리!";
 
-      if(roomData.hostId === myId){
+    text.innerHTML =
+      `스파이 <strong>${escapeHtml(spyName)}</strong>가
+       3라운드 동안 잡히지 않았습니다.`;
 
-        const button =
-          document.createElement("button");
+    area.innerHTML = "";
 
+    if(roomData.hostId === myId){
 
-        button.className = "green";
+      const button =
+        document.createElement("button");
 
+      button.className = "green";
 
-        button.innerText =
-          "새 게임 시작";
+      button.innerText =
+        "새 게임 시작";
 
+      button.onclick =
+        resetGame;
 
-        button.onclick =
-          resetGame;
-
-
-        area.appendChild(button);
-
-      }
-
-    }else{
-
-      title.innerText =
-        "😈 스파이를 놓쳤습니다!";
-
-
-      text.innerHTML =
-        `이번 라운드에서는
-         <strong>${escapeHtml(votedName)}</strong>에게
-         가장 많은 표가 갔지만 스파이가 아니었습니다.<br><br>
-         스파이는 아직 살아있습니다.`;
-
-      area.innerHTML = "";
-
-
-      if(roomData.hostId === myId){
-
-        const button =
-          document.createElement("button");
-
-
-        button.className = "green";
-
-
-        button.innerText =
-          `ROUND ${roomData.round + 1} 시작`;
-
-
-        button.onclick =
-          nextRound;
-
-
-        area.appendChild(button);
-
-      }else{
-
-        area.innerHTML =
-          '<div class="status">방장이 다음 라운드를 시작하기를 기다리는 중...</div>';
-
-      }
+      area.appendChild(button);
 
     }
+
+    return;
+  }
+
+
+  /* =========================
+     스파이 놓침 → 다음 라운드
+  ========================= */
+
+  title.innerText =
+    "😈 스파이를 놓쳤습니다!";
+
+  text.innerHTML =
+    `이번 라운드에서는
+     <strong>${escapeHtml(votedName)}</strong>에게
+     가장 많은 표가 갔지만 스파이가 아니었습니다.<br><br>
+     스파이는 아직 살아있습니다.`;
+
+  area.innerHTML = "";
+
+  if(roomData.hostId === myId){
+
+    const button =
+      document.createElement("button");
+
+    button.className = "green";
+
+    button.innerText =
+      `ROUND ${roomData.round + 1} 시작`;
+
+    button.onclick =
+      nextRound;
+
+    area.appendChild(button);
+
+  }else{
+
+    area.innerHTML =
+      '<div class="status">방장이 다음 라운드를 시작하기를 기다리는 중...</div>';
 
   }
 
