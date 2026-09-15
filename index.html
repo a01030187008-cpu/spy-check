@@ -1766,16 +1766,20 @@ async function checkVotes(){
   let highest = 0;
 
 
-  Object.keys(count).forEach(id=>{
+  let maxVotes = Math.max(...Object.values(count));
 
-    if(count[id] > highest){
+let topPlayers = Object.keys(count).filter(
+    id => count[id] === maxVotes
+);
 
-      highest = count[id];
-      mostVoted = id;
+let mostVoted = null;
+let highest = maxVotes;
 
-    }
 
-  });
+// 동률이면 아무도 탈락하지 않음
+if(topPlayers.length === 1){
+    mostVoted = topPlayers[0];
+}
 
 
   const caught =
