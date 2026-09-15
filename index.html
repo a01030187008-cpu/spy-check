@@ -6,138 +6,2091 @@
 <title>Spy Check</title>
 
 <style>
+*{
+  box-sizing:border-box;
+}
+
 body{
-    font-family:sans-serif;
-    background:#111;
-    color:white;
-    text-align:center;
-    padding:20px;
+  margin:0;
+  font-family:Arial,"Noto Sans KR",sans-serif;
+  background:#111827;
+  color:white;
+  min-height:100vh;
+}
+
+.container{
+  width:100%;
+  max-width:520px;
+  margin:auto;
+  padding:20px;
 }
 
 .card{
-    background:#222;
-    border-radius:12px;
-    padding:20px;
-    margin:20px auto;
-    max-width:500px;
+  background:#1f2937;
+  border-radius:20px;
+  padding:24px;
+  margin-top:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
 }
 
-button{
-    width:100%;
-    padding:15px;
-    margin-top:10px;
-    border:none;
-    border-radius:8px;
-    background:#4f46e5;
-    color:white;
-    font-size:16px;
+h1{
+  text-align:center;
+  margin:10px 0 8px;
+  font-size:34px;
+}
+
+h2{
+  margin-top:0;
+}
+
+.subtitle{
+  text-align:center;
+  color:#9ca3af;
+  margin-bottom:25px;
 }
 
 input{
-    width:100%;
-    padding:12px;
-    border-radius:8px;
-    border:none;
-    margin-bottom:10px;
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:12px;
+  margin:7px 0;
+  font-size:16px;
+  background:#374151;
+  color:white;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:12px;
+  margin:7px 0;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#4f46e5;
+  color:white;
+}
+
+button:active{
+  transform:scale(.98);
+}
+
+button.secondary{
+  background:#374151;
+}
+
+button.green{
+  background:#059669;
+}
+
+button.red{
+  background:#dc2626;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.room-code{
+  font-size:38px;
+  font-weight:bold;
+  text-align:center;
+  letter-spacing:8px;
+  margin:20px 0;
+}
+
+.player{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#374151;
+  padding:13px;
+  border-radius:10px;
+  margin:7px 0;
+}
+
+.badge{
+  font-size:12px;
+  padding:5px 8px;
+  border-radius:8px;
+  background:#4b5563;
+}
+
+.host-badge{
+  background:#d97706;
+}
+
+.round{
+  text-align:center;
+  color:#a5b4fc;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.situation{
+  background:#374151;
+  padding:18px;
+  border-radius:14px;
+  line-height:1.6;
+  margin-bottom:18px;
+}
+
+.question{
+  background:#312e81;
+  padding:18px;
+  border-radius:14px;
+  line-height:1.6;
+  margin-bottom:18px;
+}
+
+.choice{
+  background:#374151;
+  border:2px solid transparent;
+}
+
+.choice.selected{
+  border-color:#818cf8;
+  background:#312e81;
+}
+
+.status{
+  text-align:center;
+  padding:12px;
+  color:#d1d5db;
+  margin:10px 0;
+}
+
+.count{
+  text-align:center;
+  color:#9ca3af;
+  margin:12px 0;
+}
+
+.vote-player{
+  background:#374151;
+  border:2px solid transparent;
+}
+
+.vote-player.selected{
+  border-color:#ef4444;
+  background:#7f1d1d;
+}
+
+.result{
+  text-align:center;
+  padding:20px;
+  border-radius:15px;
+  background:#374151;
+  margin-bottom:15px;
 }
 
 .hidden{
-    display:none;
+  display:none;
+}
+
+.small{
+  color:#9ca3af;
+  font-size:13px;
+  text-align:center;
+  line-height:1.5;
+}
+
+.error{
+  background:#7f1d1d;
+  color:#fecaca;
+  padding:12px;
+  border-radius:10px;
+  margin-top:10px;
+  display:none;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🕵️ Spy Check</h1>
+<div class="container">
 
-<div class="card" id="setup">
-    <input id="name" placeholder="플레이어 이름">
+  <!-- HOME -->
+  <div id="homeScreen" class="card">
+    <h1>🕵️ Spy Check</h1>
+    <div class="subtitle">
+      일상 속 질문으로 스파이를 찾아라!
+    </div>
 
-    <button onclick="addPlayer()">
-        플레이어 추가
+    <input id="nameInput" placeholder="닉네임을 입력하세요" maxlength="12">
+
+    <button onclick="createRoom()">방 만들기</button>
+
+    <div style="text-align:center;color:#6b7280;margin:15px 0;">
+      또는
+    </div>
+
+    <input id="roomInput" placeholder="6자리 방 코드" maxlength="6"
+           inputmode="numeric">
+
+    <button class="secondary" onclick="joinRoom()">방 참가</button>
+
+    <div id="homeError" class="error"></div>
+
+    <p class="small">
+      최소 4명 이상부터 게임을 시작할 수 있습니다.
+    </p>
+  </div>
+
+
+  <!-- LOBBY -->
+  <div id="lobbyScreen" class="card hidden">
+
+    <h2>🎮 대기실</h2>
+
+    <div class="small">방 코드</div>
+    <div id="roomCodeDisplay" class="room-code">------</div>
+
+    <button class="secondary" onclick="copyRoomCode()">
+      방 코드 복사
     </button>
 
-    <div id="players"></div>
+    <h3>참가자</h3>
+    <div id="playerList"></div>
 
-    <button onclick="startGame()">
-        게임 시작
+    <div id="playerCount" class="count"></div>
+
+    <button id="startButton" class="green hidden"
+            onclick="startGame()">
+      게임 시작
     </button>
+
+    <div id="waitingMessage" class="status">
+      방장이 게임을 시작하기를 기다리는 중...
+    </div>
+
+    <button class="secondary" onclick="leaveRoom()">
+      방 나가기
+    </button>
+  </div>
+
+
+  <!-- ANSWER -->
+  <div id="answerScreen" class="card hidden">
+
+    <div id="answerRound" class="round"></div>
+
+    <div class="situation">
+      <strong>📌 상황</strong>
+      <div id="answerSituation"></div>
+    </div>
+
+    <div id="questionBox" class="question">
+      <strong>❓ 질문</strong>
+      <div id="answerQuestion"></div>
+    </div>
+
+    <div id="spyNotice"
+         class="situation hidden">
+      <strong>🕵️ 당신은 스파이입니다</strong>
+      <br><br>
+      아직 질문을 볼 수 없습니다.<br>
+      다른 사람들의 선택을 추측해보세요!
+    </div>
+
+    <h3>선택지를 고르세요</h3>
+
+    <div id="choices"></div>
+
+    <div id="answerStatus" class="status"></div>
+  </div>
+
+
+  <!-- REVEAL -->
+  <div id="revealScreen" class="card hidden">
+
+    <div class="round" id="revealRound"></div>
+
+    <h2>❓ 질문 공개!</h2>
+
+    <div class="situation">
+      <strong>상황</strong>
+      <p id="revealSituation"></p>
+
+      <strong>질문</strong>
+      <p id="revealQuestion"></p>
+    </div>
+
+    <div class="status">
+      모든 플레이어가 선택을 완료했습니다.
+    </div>
+
+    <div id="revealHostButton"></div>
+  </div>
+
+
+  <!-- VOTE -->
+  <div id="voteScreen" class="card hidden">
+
+    <div class="round" id="voteRound"></div>
+
+    <h2>🗳️ 스파이를 찾아라!</h2>
+
+    <div class="situation">
+      <strong>상황</strong>
+      <p id="voteSituation"></p>
+
+      <strong>질문</strong>
+      <p id="voteQuestion"></p>
+    </div>
+
+    <div id="votePlayers"></div>
+
+    <button id="voteButton" class="red"
+            onclick="submitVote()" disabled>
+      이 사람을 스파이로 지목
+    </button>
+
+    <div id="voteStatus" class="status"></div>
+  </div>
+
+
+  <!-- RESULT -->
+  <div id="resultScreen" class="card hidden">
+
+    <div class="result">
+
+      <h1 id="resultTitle"></h1>
+
+      <p id="resultText"></p>
+
+    </div>
+
+    <div id="nextRoundArea"></div>
+  </div>
+
 </div>
 
-<div class="card hidden" id="game"></div>
 
-<script>
+<script type="module">
 
-let players=[];
-let spy=-1;
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
-const questions=[
-"당신은 약속 시간을 잘 지키나요?",
-"당신은 비밀을 잘 지키나요?",
-"당신은 거짓말을 자주 하나요?",
-"당신은 새로운 사람과 쉽게 친해지나요?",
-"당신은 충동구매를 자주 하나요?"
+import {
+  getDatabase,
+  ref,
+  get,
+  set,
+  update,
+  onValue,
+  remove,
+  onDisconnect
+}
+from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+
+/* =========================
+   FIREBASE
+========================= */
+
+const firebaseConfig = {
+
+  apiKey:
+    "AIzaSyDGIpbtDFMiQWuEw4Rxfmn76PyuESPJW8o",
+
+  authDomain:
+    "spy-check-game-ad034.firebaseapp.com",
+
+  databaseURL:
+    "https://spy-check-game-ad034-default-rtdb.firebaseio.com/",
+
+  projectId:
+    "spy-check-game-ad034",
+
+  storageBucket:
+    "spy-check-game-ad034.firebasestorage.app",
+
+  messagingSenderId:
+    "920095189794",
+
+  appId:
+    "1:920095189794:web:f6380d78d944525ecfd37b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+
+/* =========================
+   GAME DATA
+========================= */
+
+const questions = [
+
+  {
+    situation:"친구에게 메시지를 보냈는데 3시간째 답장이 없다.",
+    question:"이럴 때 나는 보통 얼마나 신경 쓰는 편일까?",
+    choices:[
+      "매우 신경 쓴다",
+      "신경 쓰는 편이다",
+      "별로 신경 쓰지 않는다",
+      "거의 신경 쓰지 않는다"
+    ]
+  },
+
+  {
+    situation:"주말 아침에 눈을 떴는데 아무 약속도 없다.",
+    question:"이런 주말을 얼마나 자주 보내는가?",
+    choices:[
+      "자주",
+      "때때로",
+      "드물게",
+      "거의 없다"
+    ]
+  },
+
+  {
+    situation:"친구가 갑자기 오늘 만나자고 한다.",
+    question:"갑작스러운 약속을 얼마나 좋아하는가?",
+    choices:[
+      "1~2",
+      "3~4",
+      "5~6",
+      "7~8",
+      "9~10"
+    ]
+  },
+
+  {
+    situation:"휴대폰 배터리가 10%밖에 남지 않았다.",
+    question:"배터리가 10%면 얼마나 불안한가?",
+    choices:[
+      "1~2",
+      "3~4",
+      "5~6",
+      "7~8",
+      "9~10"
+    ]
+  },
+
+  {
+    situation:"오늘 하루가 생각보다 너무 빨리 지나갔다.",
+    question:"오늘 하루가 만족스러웠는가?",
+    choices:[
+      "1~2",
+      "3~4",
+      "5~6",
+      "7~8",
+      "9~10"
+    ]
+  },
+
+  {
+    situation:"친구가 내 사진을 허락 없이 단체방에 올렸다.",
+    question:"이런 행동이 얼마나 싫은가?",
+    choices:[
+      "1~2",
+      "3~4",
+      "5~6",
+      "7~8",
+      "9~10"
+    ]
+  },
+
+  {
+    situation:"약속 시간까지 30분이 남았다.",
+    question:"약속보다 일찍 도착하는 편인가?",
+    choices:[
+      "항상 그렇다",
+      "자주 그렇다",
+      "가끔 그렇다",
+      "거의 아니다"
+    ]
+  },
+
+  {
+    situation:"잠들기 직전에 갑자기 하고 싶은 일이 생겼다.",
+    question:"잠들기 전에 휴대폰을 얼마나 오래 보는 편인가?",
+    choices:[
+      "1~2",
+      "3~4",
+      "5~6",
+      "7~8",
+      "9~10"
+    ]
+  },
+
+  {
+    situation:"친구가 갑자기 전화했다.",
+    question:"예고 없이 전화가 오는 것을 어떻게 생각하는가?",
+    choices:[
+      "좋다",
+      "괜찮다",
+      "별로다",
+      "싫다"
+    ]
+  },
+
+  {
+    situation:"배가 고픈데 먹을 것이 마땅히 없다.",
+    question:"이럴 때 얼마나 참을 수 있는가?",
+    choices:[
+      "거의 못 참는다",
+      "조금 참는다",
+      "어느 정도 참는다",
+      "오래 참는다"
+    ]
+  },
+
+  {
+    situation:"친구들과 영화를 보러 가기로 했다.",
+    question:"영화관에 얼마나 자주 가는가?",
+    choices:[
+      "매우 자주",
+      "자주",
+      "가끔",
+      "거의 안 간다"
+    ]
+  },
+
+  {
+    situation:"집에 돌아왔는데 침대가 너무 편해 보인다.",
+    question:"집에 오면 바로 눕는 편인가?",
+    choices:[
+      "항상 그렇다",
+      "자주 그렇다",
+      "가끔 그렇다",
+      "거의 아니다"
+    ]
+  }
+
 ];
 
-function addPlayer(){
 
-    const name=document.getElementById("name").value;
+/* =========================
+   VARIABLES
+========================= */
 
-    if(!name)return;
+let myId =
+  localStorage.getItem("spyCheckPlayerId");
 
-    players.push(name);
+if(!myId){
 
-    document.getElementById("name").value="";
+  myId =
+    "p_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random().toString(36).substring(2,8);
 
-    renderPlayers();
+  localStorage.setItem(
+    "spyCheckPlayerId",
+    myId
+  );
 }
 
-function renderPlayers(){
+let roomCode = null;
+let roomData = null;
+let selectedChoice = null;
+let selectedVote = null;
+let unsubscribe = null;
 
-    document.getElementById("players").innerHTML=
-    players.map(p=>`<div>${p}</div>`).join("");
+
+/* =========================
+   SCREEN
+========================= */
+
+function showScreen(id){
+
+  const screens = [
+
+    "homeScreen",
+    "lobbyScreen",
+    "answerScreen",
+    "revealScreen",
+    "voteScreen",
+    "resultScreen"
+
+  ];
+
+  screens.forEach(screen => {
+
+    document
+      .getElementById(screen)
+      .classList.add("hidden");
+
+  });
+
+  document
+    .getElementById(id)
+    .classList.remove("hidden");
 }
 
-function startGame(){
 
-    if(players.length<4){
-        alert("최소 4명 필요");
-        return;
+/* =========================
+   ERROR
+========================= */
+
+function showError(message){
+
+  const box =
+    document.getElementById("homeError");
+
+  box.innerText = message;
+  box.style.display = "block";
+
+  setTimeout(() => {
+
+    box.style.display = "none";
+
+  },5000);
+}
+
+
+/* =========================
+   ROOM CODE
+========================= */
+
+function generateRoomCode(){
+
+  return Math.floor(
+    100000 +
+    Math.random() * 900000
+  ).toString();
+
+}
+
+
+/* =========================
+   CREATE ROOM
+========================= */
+
+window.createRoom = async function(){
+
+  const name =
+    document
+      .getElementById("nameInput")
+      .value.trim();
+
+  if(!name){
+
+    showError("닉네임을 먼저 입력해주세요.");
+    return;
+
+  }
+
+  let code;
+
+  for(let i=0;i<10;i++){
+
+    const candidate =
+      generateRoomCode();
+
+    const snapshot =
+      await get(
+        ref(db,"rooms/"+candidate)
+      );
+
+    if(!snapshot.exists()){
+
+      code = candidate;
+      break;
+
     }
 
-    spy=Math.floor(Math.random()*players.length);
+  }
 
-    const question=
-    questions[Math.floor(Math.random()*questions.length)];
+  if(!code){
 
-    let html="";
+    showError(
+      "방을 만들지 못했습니다. 다시 시도해주세요."
+    );
 
-    players.forEach((p,i)=>{
+    return;
+  }
 
-        html+=`
-        <button onclick="
-        alert('${
-            i===spy
-            ? '당신은 스파이입니다. 질문은 볼 수 없습니다.'
-            : question
-        }')
-        ">
-        ${p} 역할 확인
-        </button>
-        `;
+
+  roomCode = code;
+
+  const player = {
+
+    name:name,
+    joinedAt:Date.now()
+
+  };
+
+
+  await set(
+
+    ref(db,"rooms/"+roomCode),
+
+    {
+
+      hostId:myId,
+
+      phase:"lobby",
+
+      round:0,
+
+      spyId:"",
+
+      question:null,
+
+      players:{
+        [myId]:player
+      },
+
+      answers:{},
+
+      votes:{},
+
+      usedQuestions:{},
+
+      result:null
+
+    }
+
+  );
+
+
+  localStorage.setItem(
+    "spyCheckRoom",
+    roomCode
+  );
+
+
+  setupDisconnect();
+
+  listenRoom();
+
+};
+
+
+/* =========================
+   JOIN ROOM
+========================= */
+
+window.joinRoom = async function(){
+
+  const name =
+    document
+      .getElementById("nameInput")
+      .value.trim();
+
+  const code =
+    document
+      .getElementById("roomInput")
+      .value.trim();
+
+  if(!name){
+
+    showError("닉네임을 먼저 입력해주세요.");
+    return;
+
+  }
+
+  if(!/^\d{6}$/.test(code)){
+
+    showError("6자리 방 코드를 입력해주세요.");
+    return;
+
+  }
+
+
+  const snapshot =
+    await get(
+      ref(db,"rooms/"+code)
+    );
+
+
+  if(!snapshot.exists()){
+
+    showError("존재하지 않는 방입니다.");
+    return;
+
+  }
+
+
+  const data = snapshot.val();
+
+
+  if(data.phase !== "lobby"){
+
+    showError("이미 게임이 시작된 방입니다.");
+    return;
+
+  }
+
+
+  roomCode = code;
+
+
+  await update(
+
+    ref(
+      db,
+      "rooms/"+roomCode+"/players/"+myId
+    ),
+
+    {
+
+      name:name,
+      joinedAt:Date.now()
+
+    }
+
+  );
+
+
+  localStorage.setItem(
+    "spyCheckRoom",
+    roomCode
+  );
+
+
+  setupDisconnect();
+
+  listenRoom();
+
+};
+
+
+/* =========================
+   DISCONNECT
+========================= */
+
+function setupDisconnect(){
+
+  if(!roomCode) return;
+
+  const playerRef =
+    ref(
+      db,
+      "rooms/"+roomCode+"/players/"+myId
+    );
+
+  onDisconnect(playerRef).remove();
+
+}
+
+
+/* =========================
+   LISTEN
+========================= */
+
+function listenRoom(){
+
+  if(unsubscribe){
+
+    unsubscribe();
+
+  }
+
+
+  const roomRef =
+    ref(
+      db,
+      "rooms/"+roomCode
+    );
+
+
+  unsubscribe =
+    onValue(roomRef,(snapshot)=>{
+
+      if(!snapshot.exists()){
+
+        roomCode = null;
+        roomData = null;
+        showScreen("homeScreen");
+        showError("방이 종료되었습니다.");
+        return;
+
+      }
+
+
+      roomData = snapshot.val();
+
+
+      renderGame();
+
+
+      checkAutoProgress();
+
     });
 
-    document.getElementById("setup").classList.add("hidden");
+}
 
-    const game=document.getElementById("game");
 
-    game.classList.remove("hidden");
+/* =========================
+   RENDER
+========================= */
 
-    game.innerHTML=html;
+function renderGame(){
+
+  if(!roomData) return;
+
+
+  switch(roomData.phase){
+
+    case "lobby":
+      renderLobby();
+      break;
+
+    case "answer":
+      renderAnswer();
+      break;
+
+    case "reveal":
+      renderReveal();
+      break;
+
+    case "vote":
+      renderVote();
+      break;
+
+    case "result":
+      renderResult();
+      break;
+
+    case "gameover":
+      renderResult();
+      break;
+
+  }
+
+}
+
+
+/* =========================
+   LOBBY
+========================= */
+
+function renderLobby(){
+
+  showScreen("lobbyScreen");
+
+
+  document
+    .getElementById("roomCodeDisplay")
+    .innerText = roomCode;
+
+
+  const players =
+    roomData.players || {};
+
+
+  const list =
+    document.getElementById("playerList");
+
+
+  list.innerHTML = "";
+
+
+  const playerIds =
+    Object.keys(players);
+
+
+  playerIds.forEach(id=>{
+
+    const div =
+      document.createElement("div");
+
+    div.className = "player";
+
+
+    const name =
+      players[id].name || "이름 없음";
+
+
+    const badge =
+      id === roomData.hostId
+        ? '<span class="badge host-badge">방장</span>'
+        : '<span class="badge">플레이어</span>';
+
+
+    div.innerHTML =
+      `<span>${escapeHtml(name)}</span>${badge}`;
+
+
+    list.appendChild(div);
+
+  });
+
+
+  document
+    .getElementById("playerCount")
+    .innerText =
+      playerIds.length +
+      "명 참가 중";
+
+
+  const isHost =
+    roomData.hostId === myId;
+
+
+  document
+    .getElementById("startButton")
+    .classList.toggle(
+      "hidden",
+      !isHost
+    );
+
+
+  document
+    .getElementById("waitingMessage")
+    .classList.toggle(
+      "hidden",
+      isHost
+    );
+
+
+  if(isHost){
+
+    document
+      .getElementById("waitingMessage")
+      .innerText =
+        playerIds.length >= 4
+        ? "참가자가 충분합니다. 게임을 시작하세요!"
+        : "최소 4명이 필요합니다.";
+
+    document
+      .getElementById("startButton")
+      .disabled =
+        playerIds.length < 4;
+
+  }
+
+}
+
+
+/* =========================
+   START GAME
+========================= */
+
+window.startGame = async function(){
+
+  if(!roomData) return;
+
+  if(roomData.hostId !== myId){
+
+    return;
+
+  }
+
+
+  const players =
+    Object.keys(
+      roomData.players || {}
+    );
+
+
+  if(players.length < 4){
+
+    alert("최소 4명이 필요합니다.");
+    return;
+
+  }
+
+
+  const spyId =
+    players[
+      Math.floor(
+        Math.random()*players.length
+      )
+    ];
+
+
+  const firstQuestion =
+    getRandomQuestion({});
+
+
+  await update(
+
+    ref(db,"rooms/"+roomCode),
+
+    {
+
+      phase:"answer",
+
+      round:1,
+
+      spyId:spyId,
+
+      question:firstQuestion,
+
+      answers:{},
+
+      votes:{},
+
+      usedQuestions:{
+        [firstQuestion.id]:true
+      },
+
+      result:null
+
+    }
+
+  );
+
+};
+
+
+/* =========================
+   QUESTION
+========================= */
+
+function getRandomQuestion(used){
+
+  const available =
+    questions.filter(
+      (_,index)=>
+        !used[index]
+    );
+
+
+  const pool =
+    available.length
+      ? available
+      : questions;
+
+
+  const original =
+    pool[
+      Math.floor(
+        Math.random()*pool.length
+      )
+    ];
+
+
+  const index =
+    questions.indexOf(original);
+
+
+  return {
+
+    id:index,
+
+    situation:original.situation,
+
+    question:original.question,
+
+    choices:original.choices
+
+  };
+
+}
+
+
+/* =========================
+   ANSWER SCREEN
+========================= */
+
+function renderAnswer(){
+
+  showScreen("answerScreen");
+
+
+  const round =
+    roomData.round;
+
+
+  document
+    .getElementById("answerRound")
+    .innerText =
+      `ROUND ${round} / 3`;
+
+
+  const q =
+    roomData.question;
+
+
+  document
+    .getElementById("answerSituation")
+    .innerText =
+      q.situation;
+
+
+  const isSpy =
+    roomData.spyId === myId;
+
+
+  const questionBox =
+    document.getElementById("questionBox");
+
+
+  const spyNotice =
+    document.getElementById("spyNotice");
+
+
+  questionBox.classList.toggle(
+    "hidden",
+    isSpy
+  );
+
+
+  spyNotice.classList.toggle(
+    "hidden",
+    !isSpy
+  );
+
+
+  if(!isSpy){
+
+    document
+      .getElementById("answerQuestion")
+      .innerText =
+        q.question;
+
+  }
+
+
+  const choices =
+    document.getElementById("choices");
+
+
+  choices.innerHTML = "";
+
+
+  const myAnswer =
+    roomData.answers &&
+    roomData.answers[round] &&
+    roomData.answers[round][myId];
+
+
+  q.choices.forEach(
+    (choice,index)=>{
+
+      const button =
+        document.createElement("button");
+
+
+      button.className =
+        "choice";
+
+
+      if(myAnswer === index){
+
+        button.classList.add(
+          "selected"
+        );
+
+      }
+
+
+      button.innerText =
+        choice;
+
+
+      button.onclick =
+        () => submitAnswer(index);
+
+
+      choices.appendChild(button);
+
+    }
+  );
+
+
+  const answerCount =
+    Object.keys(
+      (roomData.answers &&
+       roomData.answers[round]) || {}
+    ).length;
+
+
+  const playerCount =
+    Object.keys(
+      roomData.players || {}
+    ).length;
+
+
+  document
+    .getElementById("answerStatus")
+    .innerText =
+      `선택 완료 ${answerCount} / ${playerCount}`;
+
+}
+
+
+/* =========================
+   SUBMIT ANSWER
+========================= */
+
+async function submitAnswer(index){
+
+  if(!roomData) return;
+
+
+  const round =
+    roomData.round;
+
+
+  await set(
+
+    ref(
+      db,
+      `rooms/${roomCode}/answers/${round}/${myId}`
+    ),
+
+    index
+
+  );
+
+}
+
+
+/* =========================
+   AUTO PROGRESS
+========================= */
+
+async function checkAutoProgress(){
+
+  if(!roomData) return;
+
+
+  if(roomData.phase !== "answer") return;
+
+
+  if(roomData.hostId !== myId) return;
+
+
+  const players =
+    Object.keys(
+      roomData.players || {}
+    );
+
+
+  const answers =
+    Object.keys(
+      (roomData.answers &&
+       roomData.answers[roomData.round]) || {}
+    );
+
+
+  if(
+    answers.length >= players.length
+  ){
+
+    await update(
+
+      ref(db,"rooms/"+roomCode),
+
+      {
+
+        phase:"reveal"
+
+      }
+
+    );
+
+  }
+
+}
+
+
+/* =========================
+   REVEAL
+========================= */
+
+function renderReveal(){
+
+  showScreen("revealScreen");
+
+
+  document
+    .getElementById("revealRound")
+    .innerText =
+      `ROUND ${roomData.round} / 3`;
+
+
+  document
+    .getElementById("revealSituation")
+    .innerText =
+      roomData.question.situation;
+
+
+  document
+    .getElementById("revealQuestion")
+    .innerText =
+      roomData.question.question;
+
+
+  const area =
+    document.getElementById(
+      "revealHostButton"
+    );
+
+
+  area.innerHTML = "";
+
+
+  if(roomData.hostId === myId){
+
+    const button =
+      document.createElement("button");
+
+
+    button.className = "green";
+
+
+    button.innerText =
+      "투표 시작";
+
+
+    button.onclick =
+      startVoting;
+
+
+    area.appendChild(button);
+
+  }else{
+
+    area.innerHTML =
+      '<div class="status">방장이 투표를 시작하기를 기다리는 중...</div>';
+
+  }
+
+}
+
+
+/* =========================
+   START VOTE
+========================= */
+
+async function startVoting(){
+
+  await update(
+
+    ref(db,"rooms/"+roomCode),
+
+    {
+
+      phase:"vote",
+
+      votes:{}
+
+    }
+
+  );
+
+}
+
+
+/* =========================
+   VOTE
+========================= */
+
+function renderVote(){
+
+  showScreen("voteScreen");
+
+
+  document
+    .getElementById("voteRound")
+    .innerText =
+      `ROUND ${roomData.round} / 3`;
+
+
+  document
+    .getElementById("voteSituation")
+    .innerText =
+      roomData.question.situation;
+
+
+  document
+    .getElementById("voteQuestion")
+    .innerText =
+      roomData.question.question;
+
+
+  const container =
+    document.getElementById(
+      "votePlayers"
+    );
+
+
+  container.innerHTML = "";
+
+
+  const players =
+    roomData.players || {};
+
+
+  selectedVote = null;
+
+
+  Object.keys(players).forEach(id=>{
+
+    if(id === myId) return;
+
+
+    const button =
+      document.createElement("button");
+
+
+    button.className =
+      "vote-player";
+
+
+    button.innerText =
+      players[id].name;
+
+
+    button.onclick = ()=>{
+
+      selectedVote = id;
+
+
+      document
+        .querySelectorAll(".vote-player")
+        .forEach(
+          b=>b.classList.remove("selected")
+        );
+
+
+      button.classList.add("selected");
+
+
+      document
+        .getElementById("voteButton")
+        .disabled = false;
+
+    };
+
+
+    container.appendChild(button);
+
+  });
+
+
+  const votes =
+    Object.keys(
+      roomData.votes || {}
+    ).length;
+
+
+  const total =
+    Object.keys(players).length;
+
+
+  const alreadyVoted =
+    roomData.votes &&
+    roomData.votes[myId];
+
+
+  document
+    .getElementById("voteStatus")
+    .innerText =
+      alreadyVoted
+      ? `투표 완료 (${votes}/${total})`
+      : `투표 ${votes}/${total}`;
+
+
+  document
+    .getElementById("voteButton")
+    .disabled =
+      !!alreadyVoted;
+
+}
+
+
+/* =========================
+   SUBMIT VOTE
+========================= */
+
+window.submitVote = async function(){
+
+  if(!selectedVote) return;
+
+
+  await set(
+
+    ref(
+      db,
+      `rooms/${roomCode}/votes/${myId}`
+    ),
+
+    selectedVote
+
+  );
+
+
+  document
+    .getElementById("voteButton")
+    .disabled = true;
+
+
+  if(roomData.hostId === myId){
+
+    setTimeout(
+      checkVotes,
+      500
+    );
+
+  }
+
+};
+
+
+/* =========================
+   CHECK VOTES
+========================= */
+
+async function checkVotes(){
+
+  if(!roomData) return;
+
+  if(roomData.phase !== "vote") return;
+
+  if(roomData.hostId !== myId) return;
+
+
+  const players =
+    Object.keys(
+      roomData.players || {}
+    );
+
+
+  const votes =
+    roomData.votes || {};
+
+
+  if(
+    Object.keys(votes).length <
+    players.length
+  ){
+
+    return;
+
+  }
+
+
+  const count = {};
+
+
+  Object.values(votes).forEach(target=>{
+
+    count[target] =
+      (count[target] || 0) + 1;
+
+  });
+
+
+  let mostVoted = null;
+  let highest = 0;
+
+
+  Object.keys(count).forEach(id=>{
+
+    if(count[id] > highest){
+
+      highest = count[id];
+      mostVoted = id;
+
+    }
+
+  });
+
+
+  const caught =
+    mostVoted === roomData.spyId;
+
+
+  await update(
+
+    ref(db,"rooms/"+roomCode),
+
+    {
+
+      phase:"result",
+
+      result:{
+
+        caught:caught,
+
+        votedPlayer:mostVoted,
+
+        voteCount:highest,
+
+        spyId:roomData.spyId
+
+      }
+
+    }
+
+  );
+
+}
+
+
+/* =========================
+   RESULT
+========================= */
+
+function renderResult(){
+
+  showScreen("resultScreen");
+
+
+  const result =
+    roomData.result;
+
+
+  if(!result) return;
+
+
+  const spyName =
+    roomData.players[result.spyId]
+      ? roomData.players[result.spyId].name
+      : "알 수 없음";
+
+
+  const votedName =
+    roomData.players[result.votedPlayer]
+      ? roomData.players[result.votedPlayer].name
+      : "없음";
+
+
+  const title =
+    document.getElementById(
+      "resultTitle"
+    );
+
+
+  const text =
+    document.getElementById(
+      "resultText"
+    );
+
+
+  const area =
+    document.getElementById(
+      "nextRoundArea"
+    );
+
+
+  if(result.caught){
+
+    title.innerText =
+      "🎉 시민 승리!";
+
+
+    text.innerHTML =
+      `스파이는 <strong>${escapeHtml(spyName)}</strong>였습니다.<br>
+       ${escapeHtml(votedName)}에게 ${result.voteCount}표가 몰렸습니다.`;
+
+
+    area.innerHTML = "";
+
+
+    if(roomData.hostId === myId){
+
+      const button =
+        document.createElement("button");
+
+
+      button.className = "green";
+
+
+      button.innerText =
+        "새 게임 시작";
+
+
+      button.onclick =
+        resetGame;
+
+
+      area.appendChild(button);
+
+    }
+
+  }else{
+
+    if(roomData.round >= 3){
+
+      title.innerText =
+        "🕵️ 스파이 승리!";
+
+
+      text.innerHTML =
+        `스파이 <strong>${escapeHtml(spyName)}</strong>가
+         3라운드 동안 잡히지 않았습니다.`;
+
+      area.innerHTML = "";
+
+
+      if(roomData.hostId === myId){
+
+        const button =
+          document.createElement("button");
+
+
+        button.className = "green";
+
+
+        button.innerText =
+          "새 게임 시작";
+
+
+        button.onclick =
+          resetGame;
+
+
+        area.appendChild(button);
+
+      }
+
+    }else{
+
+      title.innerText =
+        "😈 스파이를 놓쳤습니다!";
+
+
+      text.innerHTML =
+        `이번 라운드에서는
+         <strong>${escapeHtml(votedName)}</strong>에게
+         가장 많은 표가 갔지만 스파이가 아니었습니다.<br><br>
+         스파이는 아직 살아있습니다.`;
+
+      area.innerHTML = "";
+
+
+      if(roomData.hostId === myId){
+
+        const button =
+          document.createElement("button");
+
+
+        button.className = "green";
+
+
+        button.innerText =
+          `ROUND ${roomData.round + 1} 시작`;
+
+
+        button.onclick =
+          nextRound;
+
+
+        area.appendChild(button);
+
+      }else{
+
+        area.innerHTML =
+          '<div class="status">방장이 다음 라운드를 시작하기를 기다리는 중...</div>';
+
+      }
+
+    }
+
+  }
+
+}
+
+
+/* =========================
+   NEXT ROUND
+========================= */
+
+async function nextRound(){
+
+  if(roomData.hostId !== myId) return;
+
+
+  const used =
+    roomData.usedQuestions || {};
+
+
+  const nextQuestion =
+    getRandomQuestion(used);
+
+
+  const newUsed = {
+
+    ...used,
+
+    [nextQuestion.id]:true
+
+  };
+
+
+  await update(
+
+    ref(db,"rooms/"+roomCode),
+
+    {
+
+      phase:"answer",
+
+      round:roomData.round + 1,
+
+      question:nextQuestion,
+
+      answers:{},
+
+      votes:{},
+
+      usedQuestions:newUsed,
+
+      result:null
+
+    }
+
+  );
+
+}
+
+
+/* =========================
+   RESET GAME
+========================= */
+
+async function resetGame(){
+
+  if(roomData.hostId !== myId) return;
+
+
+  await update(
+
+    ref(db,"rooms/"+roomCode),
+
+    {
+
+      phase:"lobby",
+
+      round:0,
+
+      spyId:"",
+
+      question:null,
+
+      answers:{},
+
+      votes:{},
+
+      usedQuestions:{},
+
+      result:null
+
+    }
+
+  );
+
+}
+
+
+/* =========================
+   LEAVE
+========================= */
+
+window.leaveRoom = async function(){
+
+  if(roomCode){
+
+    await remove(
+
+      ref(
+        db,
+        `rooms/${roomCode}/players/${myId}`
+      )
+
+    );
+
+  }
+
+
+  if(unsubscribe){
+
+    unsubscribe();
+    unsubscribe = null;
+
+  }
+
+
+  roomCode = null;
+  roomData = null;
+
+
+  localStorage.removeItem(
+    "spyCheckRoom"
+  );
+
+
+  showScreen("homeScreen");
+
+};
+
+
+/* =========================
+   COPY
+========================= */
+
+window.copyRoomCode = async function(){
+
+  try{
+
+    await navigator.clipboard.writeText(
+      roomCode
+    );
+
+    alert("방 코드가 복사되었습니다.");
+
+  }catch(e){
+
+    alert(
+      "방 코드: " + roomCode
+    );
+
+  }
+
+};
+
+
+/* =========================
+   HTML ESCAPE
+========================= */
+
+function escapeHtml(text){
+
+  return String(text)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================
+   AUTO JOIN AFTER REFRESH
+========================= */
+
+const savedRoom =
+  localStorage.getItem(
+    "spyCheckRoom"
+  );
+
+
+if(savedRoom){
+
+  const snapshot =
+    await get(
+      ref(db,"rooms/"+savedRoom)
+    );
+
+
+  if(snapshot.exists()){
+
+    roomCode = savedRoom;
+
+    setupDisconnect();
+    listenRoom();
+
+  }
+
 }
 
 </script>
 
 </body>
-</html>
+    </html>
