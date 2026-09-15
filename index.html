@@ -1071,7 +1071,7 @@ window.startGame = async function(){
 
 
   const firstQuestion =
-    getRandomQuestion({});
+    getRandomQuestion(roomData.usedQuestions || {});
 
 
   await update(
